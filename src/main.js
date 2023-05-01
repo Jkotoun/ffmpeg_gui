@@ -1,5 +1,164 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { spawn } = require('child_process');
+
+// const ffmpegPath = require('@ffmpeg-installer/ffmpeg')
+// const ffprobePath = require('@ffprobe-installer/ffprobe')
+
+const ffmpegPath = require('ffmpeg-static-electron').path;
+const ffprobePath = require('ffprobe-static').path;
+let ffmpegProcess = undefined;
+
+
+function regexMatchedTimeToSeconds(regexmatch) {
+  const hours = parseInt(regexmatch[1], 10);
+  const minutes = parseInt(regexmatch[2], 10);
+  const seconds = parseInt(regexmatch[3], 10);
+  const totalSeconds = seconds + minutes * 60 + hours * 60 * 60;
+  return totalSeconds;
+}
+
+function getProgress(data, duration) {
+  const progressRegex = /time=(\d{2}):(\d{2}):(\d{2}).(\d{2})/;
+  const match = data.match(progressRegex);
+
+  if (match && duration) {
+    let exportedSeconds = regexMatchedTimeToSeconds(match)
+    return ((exportedSeconds / duration) * 100).toFixed(2);
+  }
+  return undefined;
+}
+
+
+
+async function getMediaInfo(event, filePath) {
+  return new Promise((resolve, reject) => {
+    const ffprobeProcess = spawn(ffprobePath, [
+      '-v', 'quiet',
+      '-print_format', 'json',
+      '-show_format',
+      '-show_streams',
+      filePath
+    ]);
+
+    let dataBuffer = Buffer.alloc(0);
+
+    ffprobeProcess.stdout.on('data', chunk => {
+      dataBuffer = Buffer.concat([dataBuffer, chunk]);
+    });
+
+    ffprobeProcess.on('error', err => {
+      reject(err);
+    });
+
+    ffprobeProcess.on('exit', code => {
+      if (code !== 0) {
+        reject(new Error(`ffprobe exited with code ${code}`));
+      } else {
+        try {
+          const dataString = dataBuffer.toString('utf8');
+          const mediaInfo = JSON.parse(dataString);
+          resolve(mediaInfo);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    });
+  });
+}
+
+
+async function handleVideoExport(
+  event,
+  inputFilePath,
+  outputFilePath,
+  videoCodec,
+  audioCodec,
+  videoBitrate,
+  audioBitrate,
+  audioSampleRate,
+  audioChannels,
+  preset,
+  resolution,
+  framerate,
+  offset,
+  duration,
+  metadata
+) {
+
+
+  ffmpegProcess = spawn(
+    ffmpegPath,
+    [
+      '-i',
+      inputFilePath,
+      '-ss', offset,
+      '-t', duration,
+      '-c:v', videoCodec,
+      '-b:v', videoBitrate,
+      '-c:a', audioCodec,
+      '-b:a', audioBitrate,
+      '-ar', audioSampleRate,
+      '-ac', audioChannels,
+      '-preset', preset,
+      '-r', framerate,
+      '-s', resolution,
+        ...metadata.map(m => ['-metadata', `${m.key}=${m.value}`]).flat(),
+      // '-metadata',
+      //  'artist=My Artist',
+      '-y',
+      outputFilePath,
+    ]
+  )
+
+  ffmpegProcess.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`)
+  })
+
+  //commented out for now, delete if the videoduration estimation from ffmpeg output isnt needed anymore
+  // let videoDuration = undefined;
+
+  //report exporting progress
+  ffmpegProcess.stderr.on('data', (data) => {
+    // if (!videoDuration) {
+    //   const durationRegex = /Duration: (\d{2}):(\d{2}):(\d{2}).(\d{2})/;
+    //   const durationMatch = data.toString().match(durationRegex)
+    //   if (durationMatch) {
+    //     videoDuration = regexMatchedTimeToSeconds(durationMatch)
+    //   }
+    // }
+    // else {
+    const progress = getProgress(data.toString(), duration);
+    if (progress) {
+      console.log(`Conversion progress: ${progress}%`);
+      event.sender.send('exportProgress', progress);
+    }
+    // }
+  })
+  ffmpegProcess.on('exit', _ => ffmpegProcess = undefined)
+
+  return new Promise((resolve, reject) => {
+    ffmpegProcess.on('error', (err) => {
+      reject(err)
+    })
+
+    ffmpegProcess.on('exit', (code) => {
+
+      if (code === 0) {
+        resolve()
+      }
+      else {
+        if (code) {
+          reject(new Error(`ffmpeg process exited with code ${code}`))
+        }
+        //no code, process was killed
+        else {
+          resolve()
+        }
+      }
+    })
+  })
+}
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -11,10 +170,9 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegration: true,
-      
     },
   });
 
@@ -25,10 +183,8 @@ const createWindow = () => {
   mainWindow.webContents.openDevTools();
 };
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+
+//methods for native feel of app on different platforms
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -39,13 +195,42 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
+async function handleFileOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ['openFile', 'singleSelection']
+  })
+  if (!canceled) {
+    return filePaths[0]
+  }
+}
+
+async function handleFileSave() {
+  const { canceled, filePath } = await dialog.showSaveDialog()
+  console.log(filePath)
+  if (!canceled) {
+    return filePath
+  }
+}
+
+
+
+app.whenReady().then(() => {
+  console.log(ffmpegPath)
+  console.log(ffprobePath)
+  ipcMain.handle('dialog:openFile', handleFileOpen)
+  ipcMain.handle('dialog:saveFile', handleFileSave)
+  ipcMain.handle('exportVideo', handleVideoExport)
+  ipcMain.handle('cancelExporting', () => {
+    if (ffmpegProcess) {
+      ffmpegProcess.kill()
+    }
+  })
+  ipcMain.handle('getMediaInfo', getMediaInfo)
+
+
+  createWindow()
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})

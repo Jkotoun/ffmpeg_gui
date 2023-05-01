@@ -2,10 +2,34 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
-
+    <title>FFmpeg GUI</title>
   </head>
   <body>
-    <button id="convert">Convert</button>
+    <div>
+      <button
+        type="button"
+        id="sourcefileBtn"
+      >
+        Open a File
+      </button>
+      Source file: <strong id="sourcefilePath"></strong>
+    </div>
+    <div>
+      <button
+        type="button"
+        id="outputfileBtn"
+      >
+        Save File
+      </button>
+      Output file: <strong id="outputfilePath"></strong>
+    </div>
+
+    <button id="exportBtn">Export</button>
+    <strong id="exportingProgress"></strong>
+
+    <button id="cancelExportingBtn" disabled >Cancel</button>
+
+
+    <span id="ffmpegFileInfo"></span>
   </body>
 </html>

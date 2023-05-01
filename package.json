@@ -31,19 +31,8 @@
     "style-loader": "^3.0.0"
   },
   "dependencies": {
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "electron-squirrel-startup": "^1.0.0",
-    "fs": "^0.0.1-security",
-    "os": "^0.1.2",
-    "path": "^0.12.7"
-  },
-  "extraResources": [
-    {
-      "from": "node_modules/ffmpeg-static/ffmpeg",
-      "to": "ffmpeg",
-      "filter": [
-        "**/*"
-      ]
-    }
-  ]
+    "ffmpeg-static-electron": "^2.0.3",
+    "ffprobe-static": "^3.1.0"
+  }
 }
