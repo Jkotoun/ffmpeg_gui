@@ -23,55 +23,25 @@ input[type='text'] {
     border: 1px solid #ccc;
 }
 
-/* #options{
-  display: none;
-} */
-
 input {
     font-size: 16px;
     background-color: #f2f2f2;
 }
 
 progress {
-    display: none;
-    width: 100%;
+    width: 300px;
     height: 10px;
     border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #f2f2f2;
+    border: 1px solid #5c5c5c;
 }
 
-#range {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
-}
-
-#content {
-    text-align: left;
-    font-size: 18px;
-    display: flex;
+#bottomBarProgress {
+    color: black;
+    /*display: flex;*/
+    display: none;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 60px;
-}
-
-#top-bar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background-color: #f2f2f2;
-    padding: 10px 0;
-    text-align: center;
-}
-
-#tableButton {
-    margin-top: 20px;
-    display: flex;
-    justify-content: left;
-    gap: 10px;
+    align-items: center;
+    margin-right: 30px;
 }
 
 button {
@@ -94,24 +64,67 @@ button:disabled {
     cursor: not-allowed;
 }
 
-.button-red {
-    background-color: #9b1c31;
+#generalWrapper,
+#infoWrapper,
+#optionsWrapper {
+    text-align: left;
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.button-red:hover {
-    background-color: #7a1723;
+#infoWrapper {
+    padding-bottom: 20px;
 }
 
-#columns {
+#optionsWrapper {
+    display: none;
+}
+
+.optionsCols {
     display: flex;
     flex-direction: row;
+    width: 100%;
     gap: 20px;
 }
-.rows {
+
+#videoOptions,
+#audioOptions {
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
+}
+
+#content {
+    margin-bottom: 60px;
+}
+
+#bottomBarWrapper {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #f2f2f2;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+#tableButtons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: left;
+    gap: 10px;
+}
+
+.buttonRed {
+    background-color: #9b1c31;
+}
+
+.buttonRed:hover {
+    background-color: #7a1723;
 }
 
 .tableInput {
@@ -122,13 +135,14 @@ button:disabled {
     padding-top: 30px;
 }
 
-.range-slider {
+.rangeSlider {
     height: 5px;
     position: relative;
     background-color: #e1e9f6;
     border-radius: 2px;
 }
-.range-selected {
+
+.rangeSelected {
     height: 100%;
     left: 0;
     right: 0;
@@ -137,10 +151,11 @@ button:disabled {
     background-color: #4caf50;
 }
 
-.range-input {
+.rangeInput {
     position: relative;
 }
-.range-input input {
+
+.rangeInput input {
     position: absolute;
     width: 100%;
     height: 5px;
@@ -150,7 +165,8 @@ button:disabled {
     -webkit-appearance: none;
     -moz-appearance: none;
 }
-.range-input input::-webkit-slider-thumb {
+
+.rangeInput input::-webkit-slider-thumb {
     height: 20px;
     width: 20px;
     border-radius: 50%;
@@ -159,7 +175,8 @@ button:disabled {
     pointer-events: auto;
     -webkit-appearance: none;
 }
-.range-input input::-moz-range-thumb {
+
+.rangeInput input::-moz-range-thumb {
     height: 15px;
     width: 15px;
     border-radius: 50%;
@@ -167,22 +184,4 @@ button:disabled {
     background-color: #4caf50;
     pointer-events: auto;
     -moz-appearance: none;
-}
-
-.range-price {
-    margin: 30px 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.range-price label {
-    margin-right: 5px;
-}
-.range-price input {
-    width: 40px;
-    padding: 5px;
-}
-.range-price input:first-of-type {
-    margin-right: 15px;
 }

@@ -6,25 +6,32 @@ const sourcefilePathElement = document.getElementById('sourcefilePath');
 const outputfilebtn = document.getElementById('outputfileBtn');
 const outputfilePathElement = document.getElementById('outputfilePath');
 const exportbtn = document.getElementById('exportBtn');
-const exportingProgressElement = document.getElementById('exportingProgress');
+const progressLabel = document.getElementById('progressLabel');
 const cancelExportingBtn = document.getElementById('cancelExportingBtn');
 const addRow = document.getElementById('addRow');
 const removeRow = document.getElementById('removeRow');
-const ffmpegFileInfoElement = document.getElementById('ffmpegFileInfo');
-const preset = document.getElementById('preset');
-const trimRangeOffset = document.getElementById('trimRangeOffset');
-const trimRangeDuration = document.getElementById('trimRangeDuration');
-const options = document.getElementById('options');
+const ffmpegFileInfoElement = document.getElementById('info');
+const bottomBarProgress = document.getElementById('bottomBarProgress');
+const progressBar = document.getElementById('progressBar');
 
-//inputs
+const options = document.getElementById('optionsWrapper');
+
+// Video inputs
+const preset = document.getElementById('preset');
 const videoCodec = document.getElementById('videoCodec');
-const audioCodec = document.getElementById('audioCodec');
 const videoBitrate = document.getElementById('videoBitrate');
-const audioBitrate = document.getElementById('audioBitrate');
-const audioSampleRate = document.getElementById('audioSampleRate');
-const audioChannels = document.getElementById('audioChannels');
 const resolution = document.getElementById('resolution');
 const framerate = document.getElementById('framerate');
+
+// Audio inputs
+const audioCodec = document.getElementById('audioCodec');
+const audioBitrate = document.getElementById('audioBitrate');
+const audioChannels = document.getElementById('audioChannels');
+const audioSampleRate = document.getElementById('audioSampleRate');
+
+// Trim inputs
+const trimRangeOffset = document.getElementById('trimRangeOffset');
+const trimRangeDuration = document.getElementById('trimRangeDuration');
 
 const range = document.querySelector('.range-selected');
 const rangeInput = document.querySelectorAll('.range-input input');
@@ -32,8 +39,7 @@ const rangeInput = document.querySelectorAll('.range-input input');
 let minDiff = 1;
 let steps = 100;
 
-function setRangeStyle(min, max){
-    console.log("updating", min, max, rangeInput[0].max, rangeInput[1].max)
+function setRangeStyle(min, max) {
     range.style.left = (min / rangeInput[0].max) * 100 + '%';
     range.style.right =
         100 - (max / rangeInput[1].max) * 100 + '%';
@@ -44,24 +50,71 @@ function formatDuration(duration) {
     var hours = Math.floor(duration / 3600);
     var minutes = Math.floor((duration % 3600) / 60);
     var seconds = Math.floor(duration % 60);
-  
+
     // Add leading zeros if necessary
     if (minutes < 10) {
-      minutes = "0" + minutes;
+        minutes = "0" + minutes;
     }
     if (seconds < 10) {
-      seconds = "0" + seconds;
+        seconds = "0" + seconds;
     }
-  
+
     // Combine hours, minutes and seconds into a string
     var formattedDuration = hours + ":" + minutes + ":" + seconds;
     return formattedDuration;
-  }
-  
+}
+
+function getTableData() {
+    var table = document.getElementById('metadataTable');
+    var data = [];
+    for (var i = 0; i < table.rows.length; i++) {
+        // Start from 1 to skip header row
+        var key = table.rows[i].cells[0].querySelector('select').value;
+        var value = table.rows[i].cells[1].querySelector('input').value;
+        data.push({ key: key, value: value });
+    }
+    return data;
+}
+
+function formatFileinfo(mediaInfo) {
+    let html = '<table>';
+    html += '<tr><td><strong>Format:</strong></td><td><strong>' + mediaInfo.format.format_name + '</strong></td></tr>';
+    html += '<tr><td>Duration:</td><td>' + formatDuration(mediaInfo.format.duration) + '</td></tr>';
+    html += '<tr><td>Size:</td><td>' + mediaInfo.format.size + '</td></tr>';
+    html += '<tr><td>Bitrate:</td><td>' + mediaInfo.format.bit_rate / 1000 + 'kbps</td></tr>';
+    html += '<tr><td><strong>Tags:</strong></td><td></td></tr>';
+
+    for (const [tag, value] of Object.entries(mediaInfo.format.tags)) {
+        html += '<tr><td>' + tag + '</td><td>' + value + '</td></tr>';
+    }
+
+    for (const stream of mediaInfo.streams) {
+        html +=
+            '<tr><td><strong>Stream Type:</strong></td><td><strong>' + stream.codec_type + '<strong></td></tr>';
+        html += '<tr><td>Codec:</td><td>' + stream.codec_name + '</td></tr>';
+        html +=
+            '<tr><td>Bitrate:</td><td>' +
+            stream.bit_rate / 1000 +
+            'kbps</td></tr>';
+        if (stream.codec_type === 'video') {
+            html +=
+                '<tr><td>Resolution:</td><td>' +
+                stream.width +
+                'x' +
+                stream.height +
+                '</td></tr>';
+            html += '<tr><td>Frame rate:</td><td>' + stream.r_frame_rate + '</td></tr>';
+        } else if (stream.codec_type === 'audio') {
+            html += '<tr><td>Channels:</td><td>' + stream.channels + '</td></tr>';
+        }
+    }
+
+    html += '</table>';
+    return html;
+}
 
 rangeInput.forEach((input) => {
     input.addEventListener('input', (e) => {
-        console.log(minDiff)
         let lowerBoundRangeVal = parseFloat(rangeInput[0].value);
         let upperBoundRangeVal = parseFloat(rangeInput[1].value);
         //check if upper bound is less than lower bound, if so, fix it with minimal difference
@@ -80,38 +133,7 @@ rangeInput.forEach((input) => {
     });
 });
 
-function getTableData() {
-    var table = document.getElementById('myTable');
-    var data = [];
-    for (var i = 0; i < table.rows.length; i++) {
-        // Start from 1 to skip header row
-        var key = table.rows[i].cells[0].querySelector('input').value;
-        var value = table.rows[i].cells[1].querySelector('input').value;
-        data.push({ key: key, value: value });
-    }
-    return data;
-}
 
-function formatFileinfo(mediaInfo) {
-    let html = '<table>';
-    for (const stream of mediaInfo.streams) {
-        html +=
-            '<tr><td>Stream Type:</td><td>' + stream.codec_type + '</td></tr>';
-        html += '<tr><td>Codec:</td><td>' + stream.codec_name + '</td></tr>';
-        html +=
-            '<tr><td>Bitrate:</td><td>' +
-            stream.bit_rate / 1000 +
-            'kbps</td></tr>';
-        html +=
-            '<tr><td>Resolution:</td><td>' +
-            stream.width +
-            'x' +
-            stream.height +
-            '</td></tr>';
-    }
-    html += '</table>';
-    return html;
-}
 
 sourcefilebtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.openFile();
@@ -122,10 +144,12 @@ sourcefilebtn.addEventListener('click', async () => {
             .getMediaInfo(filePath)
             .then((x) => {
                 let duration = x.format.duration;
+                console.log(x)
                 ffmpegFileInfoElement.innerHTML = formatFileinfo(x);
                 options.style.display = 'block';
+                bottomBarProgress.style.display = 'none';
                 rangeInput.forEach((input) => {
-                   
+
                     input.setAttribute("max", parseFloat(duration));
                     const stepSize = parseFloat(duration) / steps;
                     input.setAttribute("step", stepSize)
@@ -154,10 +178,31 @@ outputfilebtn.addEventListener('click', async () => {
 
 addRow.addEventListener('click', async () => {
     const row = document.createElement('tr');
-    const keyInput = document.createElement('input');
+    const keyInput = document.createElement('select');
     const valueInput = document.createElement('input');
     const key = document.createElement('td');
     const value = document.createElement('td');
+
+    const avalibleKeys = [
+        "title",
+        "artist",
+        "album",
+        "year",
+        "comment",
+        "track",
+        "genre",
+        "composer",
+        "copyright",
+        "language"
+    ]
+
+    for (const key of avalibleKeys) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.innerText = key.charAt(0).toUpperCase() + key.slice(1);
+        keyInput.appendChild(option);
+    }
+
 
     keyInput.classList.add('tableInput');
     keyInput.setAttribute("type", "text");
@@ -167,11 +212,11 @@ addRow.addEventListener('click', async () => {
     value.appendChild(valueInput);
     row.appendChild(key);
     row.appendChild(value);
-    document.getElementById('myTable').appendChild(row);
+    document.getElementById('metadataTable').appendChild(row);
 });
 
 removeRow.addEventListener('click', async () => {
-    const table = document.getElementById('myTable');
+    const table = document.getElementById('metadataTable');
     if (table.rows.length > 0) {
         table.deleteRow(-1);
     }
@@ -182,58 +227,51 @@ exportbtn.addEventListener('click', async () => {
     cancelExportingBtn.disabled = false;
     let inputFilePath = sourcefilePathElement.innerText;
     let outputFilePath = outputfilePathElement.innerText;
-    document.getElementById('exportingProgressbar').style.display = 'block';
-
-    //set from select input with common codecs with some mapping from human readable values (like h264 = libx264)
-    let videoCodec = 'libx264';
-    //same
-    let audioCodec = 'aac';
-    //idk, preset values or number input
-    let videoBitrate = '1000k';
-    let audioBitrate = '128k';
-
-    //preset values or number input
-    let audioSampleRate = '44100';
-    //presets
-    let audioChannels = '2';
-
-    //preset - rendering quality/speed  options: ultrafast, superfast, veryfast, fast, medium, slow, and veryslow
-    let preset = preset.value.toLowerCase();
-    //presets
-    let resolution = '1280x720';
-    //number input with min max limit or presets
-    let framerate = '30';
-    //should be range select from 0 to video duration, can be read from fileInfo json
-    let offset = '0';
-    let duration = 60;
-    //array with key value pairs containing valid metadata, ffmpeg doesnt crash when metadata is invalid
-    //idk how to do this, maybe dynamic number of  selects for common metadata keys and inputs for values
-    let metadata = getTableData();
 
     if (!inputFilePath || !outputFilePath) {
         return;
     }
 
-    exportingProgressElement.innerText = 'Exporting...';
+    bottomBarProgress.style.display = 'flex';
+    progressLabel.innerText = `Exporting...`;
+
+
     window.electronAPI
         .exportVideo(
             inputFilePath,
             outputFilePath,
-            videoCodec,
-            audioCodec,
-            videoBitrate,
-            audioBitrate,
-            audioSampleRate,
-            audioChannels,
-            preset,
-            resolution,
-            framerate,
-            offset,
-            duration,
-            metadata
+            videoCodec.value,
+            audioCodec.value,
+            videoBitrate.value,
+            audioBitrate.value,
+            audioSampleRate.value,
+            audioChannels.value,
+            preset.value.toLowerCase(),
+            resolution.value,
+            framerate.value,
+            trimRangeOffset.value,
+            trimRangeDuration.value,
+            getTableData()
         )
         .catch((x) => {
-            exportingProgressElement.innerText = `Exporting failed!`;
+            progressLabel.innerText = `Exporting failed!`;
+        })
+        .finally((_) => {
+            progressLabel.innerText = `Exporting completed!`;
+            exportbtn.disabled = false;
+            cancelExportingBtn.disabled = true;
+        });
+});
+
+cancelExportingBtn.addEventListener('click', async () => {
+    cancelExportingBtn.disabled = true;
+    window.electronAPI
+        .cancelExporting()
+        .then((_) => {
+            progressLabel.innerText = `Exporting canceled!`;
+        })
+        .catch((x) => {
+            progressLabel.innerText = `Exporting cancelation failed!`;
         })
         .finally((_) => {
             exportbtn.disabled = false;
@@ -242,29 +280,11 @@ exportbtn.addEventListener('click', async () => {
 });
 
 window.electronAPI.handleExportProgress((sender, progress) => {
-    const bar = document.getElementById('exportingProgressbar');
     if (progress < 100) {
-        exportingProgressElement.innerText = `Exporting... ${progress}%`;
-        bar.setAttribute("value", progress);
+        progressLabel.innerText = `Exporting... ${progress}%`;
+        progressBar.setAttribute("value", progress);
     } else {
-        exportingProgressElement.innerText = `Export completed!`;
-        bar.setAttribute("value", 0);
-        bar.style.display = 'none';
+        progressLabel.innerText = `Export completed!`;
+        progressBar.setAttribute("value", 0);
     }
-});
-
-cancelExportingBtn.addEventListener('click', async () => {
-    cancelExportingBtn.disabled = true;
-    window.electronAPI
-        .cancelExporting()
-        .then((_) => {
-            exportingProgressElement.innerText = `Exporting canceled!`;
-        })
-        .catch((x) => {
-            exportingProgressElement.innerText = `Exporting cancelation failed!`;
-        })
-        .finally((_) => {
-            exportbtn.disabled = false;
-            cancelExportingBtn.disabled = true;
-        });
 });
