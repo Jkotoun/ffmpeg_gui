@@ -26,28 +26,57 @@ const audioChannels = document.getElementById('audioChannels');
 const resolution = document.getElementById('resolution');
 const framerate = document.getElementById('framerate');
 
-let rangeMin = 10;
 const range = document.querySelector('.range-selected');
 const rangeInput = document.querySelectorAll('.range-input input');
 
+let minDiff = 1;
+let steps = 100;
+
+function setRangeStyle(min, max){
+    console.log("updating", min, max, rangeInput[0].max, rangeInput[1].max)
+    range.style.left = (min / rangeInput[0].max) * 100 + '%';
+    range.style.right =
+        100 - (max / rangeInput[1].max) * 100 + '%';
+}
+
+function formatDuration(duration) {
+    // Calculate hours, minutes and seconds
+    var hours = Math.floor(duration / 3600);
+    var minutes = Math.floor((duration % 3600) / 60);
+    var seconds = Math.floor(duration % 60);
+  
+    // Add leading zeros if necessary
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    if (seconds < 10) {
+      seconds = "0" + seconds;
+    }
+  
+    // Combine hours, minutes and seconds into a string
+    var formattedDuration = hours + ":" + minutes + ":" + seconds;
+    return formattedDuration;
+  }
+  
+
 rangeInput.forEach((input) => {
     input.addEventListener('input', (e) => {
-        let minRange = parseInt(rangeInput[0].value);
-        let maxRange = parseInt(rangeInput[1].value);
-        if (maxRange - minRange < rangeMin) {
+        console.log(minDiff)
+        let lowerBoundRangeVal = parseFloat(rangeInput[0].value);
+        let upperBoundRangeVal = parseFloat(rangeInput[1].value);
+        //check if upper bound is less than lower bound, if so, fix it with minimal difference
+        if (upperBoundRangeVal - lowerBoundRangeVal < minDiff) {
             if (e.target.className === 'min') {
-                rangeInput[0].value = maxRange - rangeMin;
+                rangeInput[0].value = upperBoundRangeVal - minDiff;
             } else {
-                rangeInput[1].value = minRange + rangeMin;
+                rangeInput[1].value = lowerBoundRangeVal + minDiff;
             }
         } else {
-            range.style.left = (minRange / rangeInput[0].max) * 100 + '%';
-            range.style.right =
-                100 - (maxRange / rangeInput[1].max) * 100 + '%';
+            setRangeStyle(lowerBoundRangeVal, upperBoundRangeVal)
         }
 
-        trimRangeDuration.innerText = rangeInput[1].value;
-        trimRangeOffset.innerText = rangeInput[0].value;
+        trimRangeDuration.innerText = formatDuration(rangeInput[1].value);
+        trimRangeOffset.innerText = formatDuration(rangeInput[0].value);
     });
 });
 
@@ -64,7 +93,6 @@ function getTableData() {
 }
 
 function formatFileinfo(mediaInfo) {
-    console.log(mediaInfo);
     let html = '<table>';
     for (const stream of mediaInfo.streams) {
         html +=
@@ -96,17 +124,19 @@ sourcefilebtn.addEventListener('click', async () => {
                 let duration = x.format.duration;
                 ffmpegFileInfoElement.innerHTML = formatFileinfo(x);
                 options.style.display = 'block';
-                debugger;
                 rangeInput.forEach((input) => {
+                   
+                    input.setAttribute("max", parseFloat(duration));
+                    const stepSize = parseFloat(duration) / steps;
+                    input.setAttribute("step", stepSize)
+                    minDiff = stepSize;
                     if (input.className === 'max') {
                         input.setAttribute("value", parseFloat(duration))
                     }
-                    input.setAttribute("max", parseFloat(duration));
-                    const stepSize = parseFloat(duration) / 10000;
-                    input.setAttribute("step", stepSize)
+                    setRangeStyle(0, parseFloat(duration))
 
                 });
-                trimRangeDuration.innerText = duration;
+                trimRangeDuration.innerText = formatDuration(duration);
             })
             .catch((x) => {
                 ffmpegFileInfoElement.innerText = 'Error loading file info';
