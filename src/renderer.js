@@ -2,9 +2,7 @@ import './index.css';
 
 //elements selectors
 const sourcefilebtn = document.getElementById('sourcefileBtn');
-const sourcefilePathElement = document.getElementById('sourcefilePath');
 const outputfilebtn = document.getElementById('outputfileBtn');
-const outputfilePathElement = document.getElementById('outputfilePath');
 const exportbtn = document.getElementById('exportBtn');
 const progressLabel = document.getElementById('progressLabel');
 const cancelExportingBtn = document.getElementById('cancelExportingBtn');
