@@ -39,6 +39,7 @@ const rangeInput = document.querySelectorAll('.range-input input');
 let minDiff = 1;
 let steps = 100;
 
+
 function setRangeStyle(min, max) {
     range.style.left = (min / rangeInput[0].max) * 100 + '%';
     range.style.right =
@@ -80,7 +81,7 @@ function formatFileinfo(mediaInfo) {
     let html = '<table>';
     html += '<tr><td><strong>Format:</strong></td><td><strong>' + mediaInfo.format.format_name + '</strong></td></tr>';
     html += '<tr><td>Duration:</td><td>' + formatDuration(mediaInfo.format.duration) + '</td></tr>';
-    html += '<tr><td>Size:</td><td>' + mediaInfo.format.size + '</td></tr>';
+    html += '<tr><td>Size:</td><td>' + mediaInfo.format.size + ' Bytes</td></tr>';
     html += '<tr><td>Bitrate:</td><td>' + mediaInfo.format.bit_rate / 1000 + 'kbps</td></tr>';
     html += '<tr><td><strong>Tags:</strong></td><td></td></tr>';
 
@@ -103,7 +104,7 @@ function formatFileinfo(mediaInfo) {
                 'x' +
                 stream.height +
                 '</td></tr>';
-            html += '<tr><td>Frame rate:</td><td>' + stream.r_frame_rate + '</td></tr>';
+            html += '<tr><td>Avg. frame rate:</td><td>' + Math.round(eval(stream.r_frame_rate)) + '</td></tr>';
         } else if (stream.codec_type === 'audio') {
             html += '<tr><td>Channels:</td><td>' + stream.channels + '</td></tr>';
         }
@@ -133,7 +134,7 @@ rangeInput.forEach((input) => {
     });
 });
 
-
+let inputMetadata = [];
 
 sourcefilebtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.openFile();
@@ -146,6 +147,7 @@ sourcefilebtn.addEventListener('click', async () => {
                 let duration = x.format.duration;
                 console.log(x)
                 ffmpegFileInfoElement.innerHTML = formatFileinfo(x);
+                inputMetadata = x.format.tags;
                 options.style.display = 'block';
                 bottomBarProgress.style.display = 'none';
                 rangeInput.forEach((input) => {
@@ -251,7 +253,7 @@ exportbtn.addEventListener('click', async () => {
             framerate.value,
             trimRangeOffset.value,
             trimRangeDuration.value,
-            getTableData()
+            [...getTableData(), ...inputMetadata]
         )
         .catch((x) => {
             progressLabel.innerText = `Exporting failed!`;

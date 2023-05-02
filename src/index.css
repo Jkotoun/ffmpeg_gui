@@ -185,3 +185,7 @@ button:disabled {
     pointer-events: auto;
     -moz-appearance: none;
 }
+
+.tableSelect {
+    min-width: 200px;
+}
