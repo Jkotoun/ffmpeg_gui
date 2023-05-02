@@ -37,7 +37,6 @@ progress {
 
 #bottomBarProgress {
     color: black;
-    /*display: flex;*/
     display: none;
     flex-direction: column;
     align-items: center;
@@ -98,7 +97,7 @@ button:disabled {
 }
 
 #content {
-    margin-bottom: 60px;
+    margin-bottom: 120px;
 }
 
 #bottomBarWrapper {
@@ -110,6 +109,18 @@ button:disabled {
     display: flex;
     justify-content: space-between;
     padding: 10px 20px;
+}
+
+#files {
+    position: fixed;
+    left: 0;
+    bottom: 58px;
+    background-color: #3e8e41;
+    color: white;
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
 }
 
 #tableButtons {
@@ -188,4 +199,18 @@ button:disabled {
 
 .tableSelect {
     min-width: 200px;
+}
+
+#fileSelectMessage {
+    color: red;
+}
+
+#fileSelectMessage::before {
+    content: '⚠ ';
+}
+
+#bottomBar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }

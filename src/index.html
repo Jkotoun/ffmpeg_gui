@@ -6,15 +6,6 @@
     </head>
     <body>
         <div id="content">
-            <div id="generalWrapper">
-                <h2>Genneral</h2>
-                <label>Source file:</label>
-                <strong id="sourcefilePath"></strong>
-
-                <label>Output file:</label>
-                <strong id="outputfilePath"></strong>
-            </div>
-
             <div id="infoWrapper">
                 <span id="info"></span>
             </div>
@@ -38,7 +29,9 @@
                         <h2>Video</h2>
                         <label for="videoCodec">Codec:</label>
                         <select id="videoCodec" name="videoCodec">
-                            <option value="libx264">H.264/MPEG-4 AVC</option>
+                            <option value="libx264" selected>
+                                H.264/MPEG-4 AVC
+                            </option>
                             <option vlaue="libx265">H.265/HEVC</option>
                             <option value="libvpx">VP8</option>
                             <option value="libvpx-vp9">VP9</option>
@@ -51,7 +44,7 @@
                         <label for="videoBitrate">Bitrate:</label>
                         <select id="videoBitrate" name="videoBitrate">
                             <option value="25000k">25000k</option>
-                            <option value="15000k">15000k</option>
+                            <option value="15000k" selected>15000k</option>
                             <option value="5000k">5000k</option>
                             <option value="3000k">3000k</option>
                             <option value="1500k">1500k</option>
@@ -62,7 +55,9 @@
                         <label for="resolution">Resolution:</label>
                         <select id="resolution" name="resolution">
                             <option value="3840x2160">3840x2160</option>
-                            <option value="1920x1080">1920x1080</option>
+                            <option value="1920x1080" selected>
+                                1920x1080
+                            </option>
                             <option value="1280x720">1280x720</option>
                             <option value="854x480">854x480</option>
                             <option value="640x360">640x360</option>
@@ -75,7 +70,7 @@
                             <option value="120">120</option>
                             <option value="60">60</option>
                             <option value="50">50</option>
-                            <option value="30">30</option>
+                            <option value="30" selected>30</option>
                             <option value="25">25</option>
                             <option value="24">24</option>
                             <option value="15">15</option>
@@ -88,7 +83,7 @@
                         <label for="audioCodec">Codec:</label>
                         <select id="audioCodec" name="audioCodec">
                             <option value="aac">AAC</option>
-                            <option value="libmp3lame">MP3</option>
+                            <option value="libmp3lame" selected>MP3</option>
                             <option value="libopus">Opus</option>
                             <option value="libvorbis">Vorbis</option>
                             <option value="flac">FLAC</option>
@@ -100,7 +95,7 @@
                             <option value="320k">320k</option>
                             <option value="256k">256k</option>
                             <option value="192k">192k</option>
-                            <option value="128k">128k</option>
+                            <option value="128k" selected>128k</option>
                             <option value="96k">96k</option>
                             <option value="64k">64k</option>
                             <option value="32k">32k</option>
@@ -109,7 +104,7 @@
                         <label for="audioChannels">Audio channels:</label>
                         <select id="audioChannels" name="audioChannels">
                             <option value="1">1: mono</option>
-                            <option value="2">2: stereo</option>
+                            <option value="2" selected>2: stereo</option>
                             <option value="6">5.1: surround</option>
                             <option value="copy">Same as input</option>
                         </select>
@@ -117,7 +112,7 @@
                         <label for="audioSampleRate">Audio sample rate:</label>
                         <select id="audioSampleRate" name="audioSampleRate">
                             <option value="48000">48000</option>
-                            <option value="44100">44100</option>
+                            <option value="44100" selected>44100</option>
                             <option value="32000">32000</option>
                             <option value="24000">24000</option>
                             <option value="22050">22050</option>
@@ -131,7 +126,7 @@
 
                 <h2>Trim</h2>
                 <label>
-                    Select a Range: <span id="trimRangeOffset">0</span> to
+                    Select a Range: <span id="trimRangeOffset">0:00:00</span> to
                     <span id="trimRangeDuration">10000</span>
                 </label>
 
@@ -141,6 +136,7 @@
                     </div>
                     <div class="rangeInput">
                         <input
+                            id="trimOffsetInput"
                             type="range"
                             class="min"
                             min="0"
@@ -149,6 +145,7 @@
                             step="1"
                         />
                         <input
+                            id="trimDurationInput"
                             type="range"
                             class="max"
                             min="0"
@@ -205,11 +202,14 @@
                 </div>
             </div>
 
+            <div id="files"></div>
             <div id="bottomBarWrapper">
                 <div id="bottomBar">
                     <button type="button" id="sourcefileBtn">Open file</button>
                     <button type="button" id="outputfileBtn">Save file</button>
-                    <button type="button" id="exportBtn">Export</button>
+                    <button type="button" id="exportBtn" disabled>
+                        Export
+                    </button>
                     <button
                         type="button"
                         id="cancelExportingBtn"
@@ -218,6 +218,9 @@
                     >
                         Cancel
                     </button>
+                    <strong id="fileSelectMessage"
+                        >Please select source and output file</strong
+                    >
                 </div>
                 <div id="bottomBarProgress">
                     <strong id="progressLabel" for="progressBar">

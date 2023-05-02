@@ -33,17 +33,29 @@ const audioSampleRate = document.getElementById('audioSampleRate');
 const trimRangeOffset = document.getElementById('trimRangeOffset');
 const trimRangeDuration = document.getElementById('trimRangeDuration');
 
-const range = document.querySelector('.range-selected');
-const rangeInput = document.querySelectorAll('.range-input input');
+const range = document.querySelector('.rangeSelected');
+const rangeInput = document.querySelectorAll('.rangeInput input');
 
 let minDiff = 1;
 let steps = 100;
 
+let sourceSelected = false;
+let outputSelected = false;
 
 function setRangeStyle(min, max) {
     range.style.left = (min / rangeInput[0].max) * 100 + '%';
     range.style.right =
         100 - (max / rangeInput[1].max) * 100 + '%';
+}
+
+function evaluateExportButton() {
+    if (sourceSelected && outputSelected) {
+        exportbtn.disabled = false;
+        document.getElementById("fileSelectMessage").style.display = "none";
+    }
+    else {
+        exportbtn.disabled = true;
+    }
 }
 
 function formatDuration(duration) {
@@ -134,20 +146,22 @@ rangeInput.forEach((input) => {
     });
 });
 
-let inputMetadata = [];
 
 sourcefilebtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.openFile();
     if (filePath) {
         ffmpegFileInfoElement.innerText = 'Loading file info...';
-        sourcefilePathElement.innerText = filePath;
+        inputFilePath = filePath;
         window.electronAPI
             .getMediaInfo(filePath)
             .then((x) => {
                 let duration = x.format.duration;
-                console.log(x)
+                sourceSelected = true;
+                evaluateExportButton();
+                let textDisplay = document.createElement("p");
+                textDisplay.innerText = "Source file: " + inputFilePath;
+                document.getElementById("files").appendChild(textDisplay);
                 ffmpegFileInfoElement.innerHTML = formatFileinfo(x);
-                inputMetadata = x.format.tags;
                 options.style.display = 'block';
                 bottomBarProgress.style.display = 'none';
                 rangeInput.forEach((input) => {
@@ -174,7 +188,12 @@ sourcefilebtn.addEventListener('click', async () => {
 outputfilebtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.saveFile();
     if (filePath) {
-        outputfilePathElement.innerText = filePath;
+        outputSelected = true;
+        evaluateExportButton();
+        outputFilePath = filePath;
+        let textDisplay = document.createElement("p");
+        textDisplay.innerText = "Output file: " + outputFilePath;
+        document.getElementById("files").appendChild(textDisplay);
     }
 });
 
@@ -224,11 +243,16 @@ removeRow.addEventListener('click', async () => {
     }
 });
 
+
+let inputFilePath = "";
+let outputFilePath = "";
+
 exportbtn.addEventListener('click', async () => {
     exportbtn.disabled = true;
     cancelExportingBtn.disabled = false;
-    let inputFilePath = sourcefilePathElement.innerText;
-    let outputFilePath = outputfilePathElement.innerText;
+
+    const trimOffsetInputValue = document.getElementById("trimOffsetInput").value
+    const trimDurationInputValue = document.getElementById("trimDurationInput").value
 
     if (!inputFilePath || !outputFilePath) {
         return;
@@ -237,6 +261,7 @@ exportbtn.addEventListener('click', async () => {
     bottomBarProgress.style.display = 'flex';
     progressLabel.innerText = `Exporting...`;
 
+    console.log(trimDurationInputValue, trimOffsetInputValue)
 
     window.electronAPI
         .exportVideo(
@@ -251,9 +276,9 @@ exportbtn.addEventListener('click', async () => {
             preset.value.toLowerCase(),
             resolution.value,
             framerate.value,
-            trimRangeOffset.value,
-            trimRangeDuration.value,
-            [...getTableData(), ...inputMetadata]
+            trimOffsetInputValue,
+            trimDurationInputValue,
+            getTableData()
         )
         .catch((x) => {
             progressLabel.innerText = `Exporting failed!`;
