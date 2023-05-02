@@ -148,6 +148,8 @@ rangeInput.forEach((input) => {
 
 
 sourcefilebtn.addEventListener('click', async () => {
+    let sourceFileElement = document.querySelector('#sourceFileText');
+    let sourceFilePath = document.querySelector('#sourceFilePath');
     const filePath = await window.electronAPI.openFile();
     if (filePath) {
         ffmpegFileInfoElement.innerText = 'Loading file info...';
@@ -158,18 +160,16 @@ sourcefilebtn.addEventListener('click', async () => {
                 let duration = x.format.duration;
                 sourceSelected = true;
                 evaluateExportButton();
-                let textDisplay = document.createElement("p");
-                textDisplay.innerText = "Source file: " + inputFilePath;
-                document.getElementById("files").appendChild(textDisplay);
+                sourceFileElement.style.display = 'block';
+                sourceFilePath.innerText = filePath;  
                 ffmpegFileInfoElement.innerHTML = formatFileinfo(x);
                 options.style.display = 'block';
                 bottomBarProgress.style.display = 'none';
                 rangeInput.forEach((input) => {
-
                     input.setAttribute("max", parseFloat(duration));
                     const stepSize = parseFloat(duration) / steps;
                     input.setAttribute("step", stepSize)
-                    minDiff = stepSize;
+                    minDiff = stepSize*5;
                     if (input.className === 'max') {
                         input.setAttribute("value", parseFloat(duration))
                     }
@@ -180,19 +180,21 @@ sourcefilebtn.addEventListener('click', async () => {
             })
             .catch((x) => {
                 ffmpegFileInfoElement.innerText = 'Error loading file info';
-                console.log('error', x);
             });
     }
 });
 
 outputfilebtn.addEventListener('click', async () => {
     const filePath = await window.electronAPI.saveFile();
+    let outputFileElement = document.querySelector('#outputFileText');
+    let outputFilePathElement = document.querySelector('#outputFilePath');
+
     if (filePath) {
         outputSelected = true;
         evaluateExportButton();
         outputFilePath = filePath;
-        let textDisplay = document.createElement("p");
-        textDisplay.innerText = "Output file: " + outputFilePath;
+        outputFileElement.style.display = 'block';
+        outputFilePathElement.innerText = outputFilePath;
         document.getElementById("files").appendChild(textDisplay);
     }
 });
@@ -261,7 +263,6 @@ exportbtn.addEventListener('click', async () => {
     bottomBarProgress.style.display = 'flex';
     progressLabel.innerText = `Exporting...`;
 
-    console.log(trimDurationInputValue, trimOffsetInputValue)
 
     window.electronAPI
         .exportVideo(
@@ -277,15 +278,27 @@ exportbtn.addEventListener('click', async () => {
             resolution.value,
             framerate.value,
             trimOffsetInputValue,
-            trimDurationInputValue,
+            (trimDurationInputValue-trimOffsetInputValue),
             getTableData()
         )
+        .then((resolve_code) => {
+            if(resolve_code === 0){
+                progressLabel.innerText = `Export completed!`;
+                progressBar.setAttribute("value", 100);
+            }
+            else{
+                progressLabel.innerText = `Export canceled!`;
+                progressBar.setAttribute("value", 0);
+            }
+        })
+
         .catch((x) => {
             progressLabel.innerText = `Exporting failed!`;
         })
-        .finally((_) => {
-            progressLabel.innerText = `Exporting completed!`;
+        .finally((resolve_code) => {
+            // progressLabel.innerText = `Export completed!`;
             exportbtn.disabled = false;
+            // progressBar.setAttribute("value", 100);
             cancelExportingBtn.disabled = true;
         });
 });
@@ -312,6 +325,6 @@ window.electronAPI.handleExportProgress((sender, progress) => {
         progressBar.setAttribute("value", progress);
     } else {
         progressLabel.innerText = `Export completed!`;
-        progressBar.setAttribute("value", 0);
+        progressBar.setAttribute("value", 100);
     }
 });

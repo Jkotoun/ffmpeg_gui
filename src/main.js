@@ -1,9 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { spawn } = require('child_process');
 
-// const ffmpegPath = require('@ffmpeg-installer/ffmpeg')
-// const ffprobePath = require('@ffprobe-installer/ffprobe')
-
 const ffmpegPath = require('ffmpeg-static-electron').path;
 const ffprobePath = require('ffprobe-static').path;
 let ffmpegProcess = undefined;
@@ -108,8 +105,6 @@ async function handleVideoExport(
         '-s',
         resolution,
         ...metadata.map((m) => ['-metadata', `${m.key}=${m.value}`]).flat(),
-        // '-metadata',
-        //  'artist=My Artist',
         '-y',
         outputFilePath,
     ]);
@@ -118,19 +113,10 @@ async function handleVideoExport(
         console.log(`stdout: ${data}`);
     });
 
-    //commented out for now, delete if the videoduration estimation from ffmpeg output isnt needed anymore
-    // let videoDuration = undefined;
+
 
     //report exporting progress
     ffmpegProcess.stderr.on('data', (data) => {
-        // if (!videoDuration) {
-        //   const durationRegex = /Duration: (\d{2}):(\d{2}):(\d{2}).(\d{2})/;
-        //   const durationMatch = data.toString().match(durationRegex)
-        //   if (durationMatch) {
-        //     videoDuration = regexMatchedTimeToSeconds(durationMatch)
-        //   }
-        // }
-        // else {
         const progress = getProgress(data.toString(), duration);
         if (progress) {
             console.log(`Conversion progress: ${progress}%`);
@@ -147,7 +133,7 @@ async function handleVideoExport(
 
         ffmpegProcess.on('exit', (code) => {
             if (code === 0) {
-                resolve();
+                resolve(0);
             } else {
                 if (code) {
                     reject(
@@ -156,7 +142,7 @@ async function handleVideoExport(
                 }
                 //no code, process was killed
                 else {
-                    resolve();
+                    resolve(-1);
                 }
             }
         });
@@ -181,9 +167,6 @@ const createWindow = () => {
 
     // and load the index.html of the app.
     mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
 };
 
 //methods for native feel of app on different platforms
@@ -208,15 +191,12 @@ async function handleFileOpen() {
 
 async function handleFileSave() {
     const { canceled, filePath } = await dialog.showSaveDialog();
-    console.log(filePath);
     if (!canceled) {
         return filePath;
     }
 }
 
 app.whenReady().then(() => {
-    console.log(ffmpegPath);
-    console.log(ffprobePath);
     ipcMain.handle('dialog:openFile', handleFileOpen);
     ipcMain.handle('dialog:saveFile', handleFileSave);
     ipcMain.handle('exportVideo', handleVideoExport);

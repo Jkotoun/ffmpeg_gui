@@ -214,3 +214,17 @@ button:disabled {
     gap: 10px;
     align-items: center;
 }
+
+#sourceFilePath, #outputFilePath{
+        white-space: nowrap;
+        max-width: 100ch;
+        overflow: hidden;
+        direction: rtl;
+        text-overflow: ellipsis;
+      
+}
+#sourceFileText, #outputFileText{
+
+display:none;
+
+}

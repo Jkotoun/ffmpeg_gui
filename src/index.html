@@ -18,7 +18,7 @@
                     <option value="veryfast">Veryfast</option>
                     <option value="faster">Faster</option>
                     <option value="fast">Fast</option>
-                    <option value="medium">Medium</option>
+                    <option selected value="medium">Medium</option>
                     <option value="slow">Slow</option>
                     <option value="slower">Slower</option>
                     <option value="veryslow">Veryslow</option>
@@ -27,7 +27,7 @@
                 <div class="optionsCols">
                     <div id="videoOptions">
                         <h2>Video</h2>
-                        <label for="videoCodec">Codec:</label>
+                        <label for="videoCodec">Video codec:</label>
                         <select id="videoCodec" name="videoCodec">
                             <option value="libx264" selected>
                                 H.264/MPEG-4 AVC
@@ -41,7 +41,7 @@
                             <option value="libtheora">Theora</option>
                         </select>
 
-                        <label for="videoBitrate">Bitrate:</label>
+                        <label for="videoBitrate">Video bitrate:</label>
                         <select id="videoBitrate" name="videoBitrate">
                             <option value="25000k">25000k</option>
                             <option value="15000k" selected>15000k</option>
@@ -80,7 +80,7 @@
                     </div>
                     <div id="audioOptions">
                         <h2>Audio</h2>
-                        <label for="audioCodec">Codec:</label>
+                        <label for="audioCodec">Audio codec:</label>
                         <select id="audioCodec" name="audioCodec">
                             <option value="aac">AAC</option>
                             <option value="libmp3lame" selected>MP3</option>
@@ -90,7 +90,7 @@
                             <option value="pcm_s16le">WAV</option>
                         </select>
 
-                        <label for="audioBitrate">Bitrate:</label>
+                        <label for="audioBitrate">Audio bitrate:</label>
                         <select id="audioBitrate" name="audioBitrate">
                             <option value="320k">320k</option>
                             <option value="256k">256k</option>
@@ -155,7 +155,6 @@
                         />
                     </div>
                 </div>
-
                 <h2>Metadata</h2>
                 <table>
                     <thead>
@@ -202,11 +201,14 @@
                 </div>
             </div>
 
-            <div id="files"></div>
+            <div id="files">
+                <p id="sourceFileText">Source file: <p id="sourceFilePath"></p></p>
+                <p id="outputFileText">Output File: <p id="outputFilePath"></p></p>
+            </div>
             <div id="bottomBarWrapper">
                 <div id="bottomBar">
-                    <button type="button" id="sourcefileBtn">Open file</button>
-                    <button type="button" id="outputfileBtn">Save file</button>
+                    <button type="button" id="sourcefileBtn">Source file</button>
+                    <button type="button" id="outputfileBtn">Output file</button>
                     <button type="button" id="exportBtn" disabled>
                         Export
                     </button>
@@ -218,9 +220,7 @@
                     >
                         Cancel
                     </button>
-                    <strong id="fileSelectMessage"
-                        >Please select source and output file</strong
-                    >
+                    <strong id="fileSelectMessage">Please select source and output file</strong>
                 </div>
                 <div id="bottomBarProgress">
                     <strong id="progressLabel" for="progressBar">
