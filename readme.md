@@ -1,6 +1,6 @@
 # School project for multimeda lecture - GUI for FFmpeg
 
-Simple GUI desktop app for FFmpeg tool based on electron
+Simple GUI desktop app for FFmpeg tool based on Electron
 ## To run
 yarn install && yarn run
 or
