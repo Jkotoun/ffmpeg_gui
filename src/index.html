@@ -1,113 +1,214 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>FFmpeg GUI</title>
-  </head>
-  <body>
-    <div id="content">  
-      <h2>Genneral</h2>
-      <label>Source file:</label>
-      <strong id="sourcefilePath"></strong>
-
-      <label>Output file:</label>
-      <strong id="outputfilePath"></strong>
-
-      <span id="ffmpegFileInfo"></span>
-
-      <label for="preset">Preset:</label>
-      <select id="preset" name="preset" >
-        <option value="ultrafast">Ultrafast</option>
-        <option value="superfast">Superfast</option>
-        <option value="veryfast">Veryfast</option>
-        <option value="faster">Faster</option>
-        <option value="fast">Fast</option>
-        <option value="medium">Medium</option>
-        <option value="slow">Slow</option>
-        <option value="slower">Slower</option>
-        <option value="veryslow">Veryslow</option>
-      </select>
-
-      <div id="columns">
-        <div class="rows">
-          <h2>Video</h2>
-          <label for="videoCodec">Codec:</label>
-          <select id="videoCodec" name="videoCodec">
-            <option value="h264">H.264</option>
-            <option value="h265">H.265</option>
-            <option value="vp9">VP9</option>
-          </select>
-
-
-          <label for="videoBitrate">Bitrate:</label>
-          <input type="text" id="videioBitrate" name="videoBitrate">
-          
-          <label for="resolution">Resolution:</label>
-          <select id="resolution" name="resolution">
-            <option value="480p">480p</option>
-            <option value="720p">720p</option>
-            <option value="1080p">1080p</option>
-          </select>
-          
-
-
-          <label for="framerate">Framerate:</label>
-          <input type="text" id="framerate" name="framerate">
+    <head>
+        <meta charset="UTF-8" />
+        <title>FFmpeg GUI</title>
+    </head>
+    <body>
+        <div id="top-bar">
+            <button type="button" id="sourcefileBtn">Open file</button>
+            <button type="button" id="outputfileBtn">Save file</button>
+            <button type="button" id="exportBtn">Export</button>
+            <button
+                type="button"
+                id="cancelExportingBtn"
+                class="button-red"
+                disabled
+            >
+                Cancel
+            </button>
         </div>
-        <div class="rows">
-          <h2>Audio</h2>
-          <label for="audioCodec">Codec:</label>
-          <select id="audioCodec" name="audioCodec">
-            <option value="aac">AAC</option>
-            <option value="mp3">MP3</option>
-            <option value="opus">Opus</option>
-          </select>
 
-          <label for="audioBitrate">Bitrate:</label>
-          <input type="text" id="audioBitrate" name="audioBitrate">
+        <div id="content">
+            <h2>Genneral</h2>
+            <label>Source file:</label>
+            <strong id="sourcefilePath"></strong>
 
-          <label for="audioChannels">Audio channels:</label>
-          <input type="text" id="audioChannels" name="audioChannels">
+            <label>Output file:</label>
+            <strong id="outputfilePath"></strong>
 
-          <label for="audioSampleRate">Audio sample rate:</label>
-          <input type="text" id="audioSampleRate" name="audioSampleRate">
+            <span id="ffmpegFileInfo"></span>
+
+            <div id="options">
+                <label for="preset">Preset:</label>
+                <select id="preset" name="preset">
+                    <option value="ultrafast">Ultrafast</option>
+                    <option value="superfast">Superfast</option>
+                    <option value="veryfast">Veryfast</option>
+                    <option value="faster">Faster</option>
+                    <option value="fast">Fast</option>
+                    <option value="medium">Medium</option>
+                    <option value="slow">Slow</option>
+                    <option value="slower">Slower</option>
+                    <option value="veryslow">Veryslow</option>
+                </select>
+
+                <div id="columns">
+                    <div class="rows">
+                        <h2>Video</h2>
+                        <label for="videoCodec">Codec:</label>
+                        <select id="videoCodec" name="videoCodec">
+                            <option value="libx264">H.264/MPEG-4 AVC</option>
+                            <option vlaue="libx265">H.265/HEVC</option>
+                            <option value="libvpx">VP8</option>
+                            <option value="libvpx-vp9">VP9</option>
+                            <option value="libaom-av1">AV1</option>
+                            <option value="prores">Apple ProRes</option>
+                            <option value="mpeg4">MPEG-4</option>
+                            <option value="libtheora">Theora</option>
+                        </select>
+
+                        <label for="videoBitrate">Bitrate:</label>
+                        <select id="videoBitrate" name="videoBitrate">
+                            <option value="25000k">25000k</option>
+                            <option value="15000k">15000k</option>
+                            <option value="5000k">5000k</option>
+                            <option value="3000k">3000k</option>
+                            <option value="1500k">1500k</option>
+                            <option value="800k">800k</option>
+                            <option value="400k">400k</option>
+                        </select>
+
+                        <label for="resolution">Resolution:</label>
+                        <select id="resolution" name="resolution">
+                            <option value="3840x2160">3840x2160</option>
+                            <option value="1920x1080">1920x1080</option>
+                            <option value="1280x720">1280x720</option>
+                            <option value="854x480">854x480</option>
+                            <option value="640x360">640x360</option>
+                            <option value="426x240">426x240</option>
+                        </select>
+
+                        <label for="framerate">Framerate:</label>
+                        <select id="framerate" name="framerate">
+                            <option value="144">144</option>
+                            <option value="120">120</option>
+                            <option value="60">60</option>
+                            <option value="50">50</option>
+                            <option value="30">30</option>
+                            <option value="25">25</option>
+                            <option value="24">24</option>
+                            <option value="15">15</option>
+                            <option value="10">10</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="rows">
+                        <h2>Audio</h2>
+                        <label for="audioCodec">Codec:</label>
+                        <select id="audioCodec" name="audioCodec">
+                            <option value="aac">AAC</option>
+                            <option value="libmp3lame">MP3</option>
+                            <option value="libopus">Opus</option>
+                            <option value="libvorbis">Vorbis</option>
+                            <option value="flac">FLAC</option>
+                            <option value="pcm_s16le">WAV</option>
+                        </select>
+
+                        <label for="audioBitrate">Bitrate:</label>
+                        <select id="audioBitrate" name="audioBitrate">
+                            <option value="320k">320k</option>
+                            <option value="256k">256k</option>
+                            <option value="192k">192k</option>
+                            <option value="128k">128k</option>
+                            <option value="96k">96k</option>
+                            <option value="64k">64k</option>
+                            <option value="32k">32k</option>
+                        </select>
+
+                        <label for="audioChannels">Audio channels:</label>
+                        <select id="audioChannels" name="audioChannels">
+                            <option value="1">1: mono</option>
+                            <option value="2">2: stereo</option>
+                            <option value="6">5.1: surround</option>
+                            <option value="copy">Same as input</option>
+                        </select>
+
+                        <label for="audioSampleRate">Audio sample rate:</label>
+                        <select id="audioSampleRate" name="audioSampleRate">
+                            <option value="48000">48000</option>
+                            <option value="44100">44100</option>
+                            <option value="32000">32000</option>
+                            <option value="24000">24000</option>
+                            <option value="22050">22050</option>
+                            <option value="16000">16000</option>
+                            <option value="12000">12000</option>
+                            <option value="11025">11025</option>
+                            <option value="8000">8000</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h2>Trim</h2>
+                <label
+                    >Select a Range: <span id="trimRangeOffset">0</span> to
+                    <span id="trimRangeDuration">1000</span></label
+                >
+                <div class="range">
+                    <div class="range-slider">
+                        <span class="range-selected"></span>
+                    </div>
+                    <div class="range-input">
+                        <input
+                            type="range"
+                            class="min"
+                            min="0"
+                            max="1213.1212"
+                            value="0"
+                            step="0.1"
+                        />
+                        <input
+                            type="range"
+                            class="max"
+                            min="0"
+                            max="1213.1212"
+                            value="323.21812"
+                            step="0.1"
+                        />
+                    </div>
+                </div>
+
+                <strong id="exportingProgress"></strong>
+                <progress
+                    id="exportingProgressbar"
+                    value="0"
+                    max="100"
+                ></progress>
+
+                <h2>Metadata</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Key:</th>
+                            <th>Value:</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        <tr>
+                            <td>
+                                <input
+                                    type="text"
+                                    class="tableInput"
+                                    name="key[]"
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="text"
+                                    class="tableInput"
+                                    name="value[]"
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="tableButton">
+                    <button type="button" id="addRow">Add Row</button>
+                    <button type="button" id="removeRow" class="button-red">
+                        Remove Row
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <h2>Trim</h2>
-      <label for="range">Select a Range: <span id="trimRangeDisplay">0</span> to <span id="timRangeDuration">0</span></label>
-      <input type="range" id="trimRange" class="range" name="range" min="0" max="100" value="0" step="1">
-
-
-      <strong id="exportingProgress"></strong>
-      <progress id="exportingProgressbar" value="0" max="100"></progress>
-     
-      <h2>Metadata</h2>
-      <table id="myTable">
-        <thead>
-          <tr>
-            <th>Key:</th>
-            <th>Value:</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td ><input type="text" class="tableInput" name="key[]"></td>
-            <td ><input type="text" class="tableInput" name="value[]"></td>
-          </tr>
-        </tbody>
-      </table>      
-      <div id="tableButton">
-        <button type="button" id="addRow">Add Row</button>
-        <button type="button" id="removeRow" class="button-red">Remove Row</button>
-      </div>
-    </div> 
-
-    <div id="bottom-bar">
-      <button type="button" id="sourcefileBtn">Open file</button>
-      <button type="button" id="outputfileBtn">Save file</button>
-      <button type="button" id="exportBtn">Export</button>
-      <button type="button" id="cancelExportingBtn" class="button-red" disabled >Cancel</button>
-    </div>
-  </body>
+    </body>
 </html>
