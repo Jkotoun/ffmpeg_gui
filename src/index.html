@@ -1,35 +1,113 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <title>FFmpeg GUI</title>
   </head>
   <body>
-    <div>
-      <button
-        type="button"
-        id="sourcefileBtn"
-      >
-        Open a File
-      </button>
-      Source file: <strong id="sourcefilePath"></strong>
+    <div id="content">  
+      <h2>Genneral</h2>
+      <label>Source file:</label>
+      <strong id="sourcefilePath"></strong>
+
+      <label>Output file:</label>
+      <strong id="outputfilePath"></strong>
+
+      <span id="ffmpegFileInfo"></span>
+
+      <label for="preset">Preset:</label>
+      <select id="preset" name="preset" >
+        <option value="ultrafast">Ultrafast</option>
+        <option value="superfast">Superfast</option>
+        <option value="veryfast">Veryfast</option>
+        <option value="faster">Faster</option>
+        <option value="fast">Fast</option>
+        <option value="medium">Medium</option>
+        <option value="slow">Slow</option>
+        <option value="slower">Slower</option>
+        <option value="veryslow">Veryslow</option>
+      </select>
+
+      <div id="columns">
+        <div class="rows">
+          <h2>Video</h2>
+          <label for="videoCodec">Codec:</label>
+          <select id="videoCodec" name="videoCodec">
+            <option value="h264">H.264</option>
+            <option value="h265">H.265</option>
+            <option value="vp9">VP9</option>
+          </select>
+
+
+          <label for="videoBitrate">Bitrate:</label>
+          <input type="text" id="videioBitrate" name="videoBitrate">
+          
+          <label for="resolution">Resolution:</label>
+          <select id="resolution" name="resolution">
+            <option value="480p">480p</option>
+            <option value="720p">720p</option>
+            <option value="1080p">1080p</option>
+          </select>
+          
+
+
+          <label for="framerate">Framerate:</label>
+          <input type="text" id="framerate" name="framerate">
+        </div>
+        <div class="rows">
+          <h2>Audio</h2>
+          <label for="audioCodec">Codec:</label>
+          <select id="audioCodec" name="audioCodec">
+            <option value="aac">AAC</option>
+            <option value="mp3">MP3</option>
+            <option value="opus">Opus</option>
+          </select>
+
+          <label for="audioBitrate">Bitrate:</label>
+          <input type="text" id="audioBitrate" name="audioBitrate">
+
+          <label for="audioChannels">Audio channels:</label>
+          <input type="text" id="audioChannels" name="audioChannels">
+
+          <label for="audioSampleRate">Audio sample rate:</label>
+          <input type="text" id="audioSampleRate" name="audioSampleRate">
+        </div>
+      </div>
+
+      <h2>Trim</h2>
+      <label for="range">Select a Range: <span id="trimRangeDisplay">0</span> to <span id="timRangeDuration">0</span></label>
+      <input type="range" id="trimRange" class="range" name="range" min="0" max="100" value="0" step="1">
+
+
+      <strong id="exportingProgress"></strong>
+      <progress id="exportingProgressbar" value="0" max="100"></progress>
+     
+      <h2>Metadata</h2>
+      <table id="myTable">
+        <thead>
+          <tr>
+            <th>Key:</th>
+            <th>Value:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td ><input type="text" class="tableInput" name="key[]"></td>
+            <td ><input type="text" class="tableInput" name="value[]"></td>
+          </tr>
+        </tbody>
+      </table>      
+      <div id="tableButton">
+        <button type="button" id="addRow">Add Row</button>
+        <button type="button" id="removeRow" class="button-red">Remove Row</button>
+      </div>
+    </div> 
+
+    <div id="bottom-bar">
+      <button type="button" id="sourcefileBtn">Open file</button>
+      <button type="button" id="outputfileBtn">Save file</button>
+      <button type="button" id="exportBtn">Export</button>
+      <button type="button" id="cancelExportingBtn" class="button-red" disabled >Cancel</button>
     </div>
-    <div>
-      <button
-        type="button"
-        id="outputfileBtn"
-      >
-        Save File
-      </button>
-      Output file: <strong id="outputfilePath"></strong>
-    </div>
-
-    <button id="exportBtn">Export</button>
-    <strong id="exportingProgress"></strong>
-
-    <button id="cancelExportingBtn" disabled >Cancel</button>
-
-
-    <span id="ffmpegFileInfo"></span>
   </body>
 </html>
